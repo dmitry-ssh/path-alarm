@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage x:Class="PathAlarm.Gui.MainPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="30,0"
+            Spacing="25"
+            VerticalOptions="Center">
+
+            <!--  <Image  -->
+            <!--  Source="dotnet_bot.png"  -->
+            <!--  SemanticProperties.Description="Cute dot net bot waving hi to you!"  -->
+            <!--  HeightRequest="200"  -->
+            <!--  HorizontalOptions="Center" />  -->
+            <Border
+                Stroke="Black"
+                StrokeThickness="1">
+                <Editor x:Name="editor"
+                    HeightRequest="100"
+                    IsReadOnly="True"
+                    Placeholder="Enter your response here" />
+            </Border>
+            <Label
+                HorizontalOptions="Center"
+                Text="Milestones:" />
+            <Border
+                Stroke="Black"
+                StrokeThickness="1">
+                <Editor x:Name="milestones"
+                    HeightRequest="100"
+                    IsReadOnly="True"
+                    Placeholder="" />
+            </Border>
+            <HorizontalStackLayout HorizontalOptions="Fill">
+                <Editor x:Name="coordinateInput"
+                    HorizontalOptions="Fill"
+                    WidthRequest="200" />
+                <Button
+                    Clicked="Button_Clicked_1"
+                    HorizontalOptions="End"
+                    Text="Add" />
+            </HorizontalStackLayout>
+
+            <Border
+                Stroke="Black"
+                StrokeThickness="1">
+                <HorizontalStackLayout HorizontalOptions="Fill">
+                    <Editor x:Name="distanceInput"
+                        HorizontalOptions="Fill"
+                        Text="20"
+                        WidthRequest="200" />
+                    <Button
+                        Clicked="Button_Clicked_2"
+                        HorizontalOptions="End"
+                        Text="Update" />
+                </HorizontalStackLayout>
+            </Border>
+
+            <Button
+                Clicked="OnRemoveAlarm"
+                HorizontalOptions="Center"
+                Text="Remove alarm" />
+            <Button
+                Clicked="OnServiceStartClicked"
+                HorizontalOptions="Center"
+                Text="start Services" />
+
+            <Button
+                Clicked="Button_Clicked"
+                HorizontalOptions="Center"
+                Text="Stop Service" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
