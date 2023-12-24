@@ -1,0 +1,3 @@
+[submodule "src/mvvm-base"]
+	path = src/mvvm-base
+	url = git@github.com:dmitry-ssh/mvvm-base.git
