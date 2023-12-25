@@ -54,4 +54,9 @@
 	  <PackageReference Include="Plugin.LocalNotification" Version="10.1.8" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\mvvm-base\src\MVVMBase\MVVMBase.csproj" />
+	  <ProjectReference Include="..\PathAlarm.Engine\PathAlarm.Engine.csproj" />
+	</ItemGroup>
+
 </Project>

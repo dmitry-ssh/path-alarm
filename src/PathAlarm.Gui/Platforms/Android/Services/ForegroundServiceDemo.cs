@@ -4,8 +4,8 @@ using Android.Content;
 using Android.OS;
 using Android.Runtime;
 using AndroidX.Core.App;
-using NetMQ;
-using NetMQ.Sockets;
+using PathAlarm.Engine.Coordinates;
+using PathAlarm.Engine.Main;
 using PathAlarm.Gui.Services;
 
 namespace PathAlarm.Gui.Platforms.Android.Services;
@@ -16,9 +16,9 @@ public class ForegroundServiceDemo : Service, IForegroundService
     private int NOTIFICATION_ID = 1;
     private string NOTIFICATION_CHANNEL_NAME = "notification";
     private Timer timer;
-    private IGpsManager gpsManager = new GpsDummy();
+    private readonly IGpsManager gpsManager = new GpsDummy();
     //private IGpsManager gpsManager = new GpsManager();
-    private PublisherSocket publisherSocket;
+    private readonly LocationPublisher locationPublisher = new();
 
     public override IBinder OnBind(Intent intent)
     {
@@ -30,17 +30,15 @@ public class ForegroundServiceDemo : Service, IForegroundService
     {
         if (intent.Action == "START_SERVICE")
         {
-            publisherSocket = new PublisherSocket();
-            publisherSocket.Options.SendHighWatermark = 1000;
-            publisherSocket.Bind("tcp://*:13344");
+            locationPublisher.Start();
             timer = new Timer(Callback, this, TimeSpan.Zero, TimeSpan.FromSeconds(10));
-            RegisterNotification();//Proceed to notify
+            RegisterNotification();
         }
         else if (intent.Action == "STOP_SERVICE")
         {
             timer.Dispose();
-            publisherSocket.Dispose();
-            StopForeground(true);//Stop the service
+            locationPublisher.Dispose();
+            StopForeground(true);
             StopSelfResult(startId);
         }
 
@@ -49,16 +47,15 @@ public class ForegroundServiceDemo : Service, IForegroundService
 
     private void Callback(object state)
     {
-        var t = Task.Run(async () =>
+        Task.Run(async () =>
         {
             var coordinates = await gpsManager.GetCurrentCoordinates();
             var coords = $"{coordinates[0].ToString(CultureInfo.InvariantCulture)}, {coordinates[1].ToString(CultureInfo.InvariantCulture)}, {coordinates[2].ToString(CultureInfo.InvariantCulture)}";
             Console.WriteLine(coords);
-            publisherSocket?.SendMoreFrame("TopicA").SendFrame(coords);
-            var notifcationManager = GetSystemService(Context.NotificationService) as NotificationManager;
+            locationPublisher.Send(coords);
+            var notificationManager = GetSystemService(Context.NotificationService) as NotificationManager;
             var notification = CreateNotification(coords);
-            notifcationManager.Notify(NOTIFICATION_ID, notification.Build());
-            //LocationUpdated?.Invoke(coordinates);
+            notificationManager?.Notify(NOTIFICATION_ID, notification.Build());
         });
         Console.WriteLine($"Callback!!!");
     }
@@ -78,35 +75,17 @@ public class ForegroundServiceDemo : Service, IForegroundService
         stopIntent.SetAction("STOP_SERVICE");
         MainActivity.ActivityCurrent.StartService(stopIntent);
     }
-
-    public void SetAction(Action<double[]> action)
-    {
-        LocationUpdated = action;
-    }
-
-    private Action<double[]> LocationUpdated { get; set; }
-
     private void RegisterNotification()
     {
-        var notifcationManager = GetSystemService(Context.NotificationService) as NotificationManager;
+        var notificationManager = GetSystemService(Context.NotificationService) as NotificationManager;
 
         if (Build.VERSION.SdkInt >= BuildVersionCodes.O)
         {
-            CreateNotificationChannel(notifcationManager);
+            CreateNotificationChannel(notificationManager);
         }
 
         var notification = CreateNotification("Foreground Service is running");
         StartForeground(NOTIFICATION_ID, notification.Build());
-        //NotificationChannel channel = new NotificationChannel("ServiceChannel", "ServiceDemo", NotificationImportance.Max);
-        //NotificationManager manager = (NotificationManager)MainActivity.ActivityCurrent.GetSystemService(Context.NotificationService);
-        //manager.CreateNotificationChannel(channel);
-        //Notification notification = new Notification.Builder(this, "ServiceChannel")
-        //    .SetContentTitle("Service Working")
-        //    .SetSmallIcon(Resource.Drawable.abc_ab_share_pack_mtrl_alpha)
-        //    .SetOngoing(true)
-        //    .Build();
-
-        //StartForeground(100, notification);
     }
 
     private NotificationCompat.Builder CreateNotification(string text)
@@ -125,10 +104,5 @@ public class ForegroundServiceDemo : Service, IForegroundService
         var channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, NOTIFICATION_CHANNEL_NAME,
             NotificationImportance.Low);
         notificationMnaManager.CreateNotificationChannel(channel);
-    }
-
-    private void RequestLocation()
-    {
-
     }
 }

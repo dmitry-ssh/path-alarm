@@ -1,7 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage x:Class="PathAlarm.Gui.MainPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:PathAlarm.Engine.Main;assembly=PathAlarm.Engine"
+    xmlns:vmc="clr-namespace:PathAlarm.Engine.Coordinates;assembly=PathAlarm.Engine"
+    x:DataType="vm:MainViewModel">
 
     <ScrollView>
         <VerticalStackLayout
@@ -20,7 +23,8 @@
                 <Editor x:Name="editor"
                     HeightRequest="100"
                     IsReadOnly="True"
-                    Placeholder="Enter your response here" />
+                    Placeholder="Enter your response here"
+                    Text="{Binding CurrentCoordinateStatus}" />
             </Border>
             <Label
                 HorizontalOptions="Center"
@@ -28,17 +32,36 @@
             <Border
                 Stroke="Black"
                 StrokeThickness="1">
-                <Editor x:Name="milestones"
+                <!--<Editor x:Name="milestones"
                     HeightRequest="100"
                     IsReadOnly="True"
-                    Placeholder="" />
+                    Placeholder="" />-->
+                <CollectionView ItemsSource="{Binding CoordinatePoints}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="vmc:CoordinatePointViewModel">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Label Text="{Binding Text}" />
+                                <Button
+                                    Grid.Column="1"
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainViewModel}}, Path=RemovePointCommand}"
+                                    CommandParameter="{Binding}"
+                                    Text="x" />
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
             </Border>
             <HorizontalStackLayout HorizontalOptions="Fill">
                 <Editor x:Name="coordinateInput"
                     HorizontalOptions="Fill"
+                    Text="{Binding NewCoordinateText}"
                     WidthRequest="200" />
                 <Button
-                    Clicked="Button_Clicked_1"
+                    Command="{Binding AddCoordinateCommand}"
                     HorizontalOptions="End"
                     Text="Add" />
             </HorizontalStackLayout>
@@ -47,32 +70,24 @@
                 Stroke="Black"
                 StrokeThickness="1">
                 <HorizontalStackLayout HorizontalOptions="Fill">
-                    <Editor x:Name="distanceInput"
+                    <Editor
                         HorizontalOptions="Fill"
-                        Text="20"
+                        Text="{Binding Distance}"
                         WidthRequest="200" />
                     <Button
-                        Clicked="Button_Clicked_2"
+                        Command="{Binding ChangeDistanceCommand}"
                         HorizontalOptions="End"
                         Text="Update" />
                 </HorizontalStackLayout>
             </Border>
-
             <Button
-                Clicked="OnRemoveAlarm"
-                HorizontalOptions="Center"
-                Text="Remove alarm" />
-            <Button
-                Clicked="OnServiceStartClicked"
+                Command="{Binding StartServiceCommand}"
                 HorizontalOptions="Center"
                 Text="start Services" />
-
             <Button
-                Clicked="Button_Clicked"
+                Command="{Binding StopServiceCommand}"
                 HorizontalOptions="Center"
                 Text="Stop Service" />
-
         </VerticalStackLayout>
     </ScrollView>
-
 </ContentPage>

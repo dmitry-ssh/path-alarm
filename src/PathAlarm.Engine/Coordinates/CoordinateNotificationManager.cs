@@ -1,14 +1,13 @@
-﻿using System.Diagnostics;
-using System.Globalization;
-using PathAlarm.Gui.Models;
+﻿using System.Globalization;
+using PathAlarm.Models.Coordinates;
 
-namespace PathAlarm.Gui.Services;
+namespace PathAlarm.Engine.Coordinates;
 
 public class CoordinateNotificationManager
 {
-    private List<GpsCoordinate> coordinateList = new List<GpsCoordinate>();
+    private readonly List<GpsCoordinate> coordinateList = new();
     private int notifyDistance = 20;
-    private GpsCoordinate currentCoordinate;
+    private GpsCoordinate? currentCoordinate;
     public void Add(string coordinateString)
     {
         if (!ExtractCoordinate(coordinateString, out var coordinate))
@@ -36,7 +35,7 @@ public class CoordinateNotificationManager
 
         notifyDistance = newDistance;
     }
-    private static bool ExtractCoordinate(string coordinateString, out GpsCoordinate coordinate)
+    public static bool ExtractCoordinate(string coordinateString, out GpsCoordinate coordinate)
     {
         coordinate = new GpsCoordinate();
         var parts = coordinateString.Split(", ", StringSplitOptions.RemoveEmptyEntries);
